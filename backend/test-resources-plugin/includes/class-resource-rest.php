@@ -8,6 +8,10 @@ class TR_Resource_REST {
     private $namespace = 'test/v1';
     private $route = '/resources';
 
+    public function __construct() {
+        add_action('rest_api_init', [$this, 'register_routes']);
+    }
+
     public function register_routes() {
         register_rest_route($this->namespace, $this->route, [
             'methods' => WP_REST_Server::READABLE,
@@ -15,7 +19,6 @@ class TR_Resource_REST {
             'permission_callback' => '__return_true',
         ]);
     }
-
 
     /**
      * Handle GET /wp-json/test/v1/resources
