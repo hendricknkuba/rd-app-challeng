@@ -1,77 +1,95 @@
 <?php
-if (!defined('ABSPATH')) {
-    exit;
-}
-
-/**
- * Handles the registration of the "Resource" custom post type
- * and its custom meta fields.
- */
+if (!defined('ABSPATH')) exit;
 
 class TR_Resource_CPT {
 
     private $post_type = 'resource';
-    private $levels = ['beginner', 'intermediate', 'advanced'];
 
-    /**
-     * Registers the custom post type and custom fields.
-     */
+    public function __construct() {
+
+        add_action('init', [$this, 'register']);
+        add_action('add_meta_boxes', [$this, 'add_meta_box']);
+        add_action('save_post', [$this, 'save_meta_box']);
+
+        add_filter('use_block_editor_for_post_type', function ($use, $post_type) {
+            if ($post_type === $this->post_type) {
+                return false; // forçando Classic Editor
+            }
+            return $use;
+        }, 10, 2);
+    }
+
+    public function enable_gutenberg($use, $post_type) {
+        return $post_type === $this->post_type ? true : $use;
+    }
+
     public function register() {
-        $labels = [
-            'name' => __('Resources', 'test-resources'),
-            'singular_name' => __('Resource', 'test-resources'),
-        ];
 
-        $args = [
-            'labels' => $labels,
+        register_post_type($this->post_type, [
+            'label' => 'Resources',
             'public' => true,
-            'has_archive' => false,
             'show_in_rest' => true,
-            'menu_icon' => 'dashicons-welcome-learn-more',
-            'supports' => ['title'],
-        ];
-
-        register_post_type($this->post_type, $args);
-
-        // Registers the native WP meta fields without ACF
-        foreach (['summary', 'level'] as $meta_key) {
-            register_post_meta($this->post_type, $meta_key, [
-                'type'         => 'string',
-                'single'       => true,
-                'show_in_rest' => true,
-                'auth_callback'=> '__return_true',
-            ]);
-        }
-    }
-
-    /**
-     * Creates a sample post on plugin activation.
-     */
-    public function create_sample_post() {
-        // Avoid duplication
-        $existing = get_posts([
-            'post_type' => $this->post_type,
-            'numberposts'     => 1,
+            'supports' => ['title', 'custom-fields'], // ✅ necessário para Gutenberg
         ]);
 
-        if ($existing) return;
-
-        $post_id = wp_insert_post([
-            'post_type' => $this->post_type,
-            'post_title' => 'Introduction to WordPress REST API',
-            'post_status' => 'publish',
+        register_post_meta($this->post_type, '_summary', [
+            'single' => true,
+            'show_in_rest' => true,
+            'type' => 'string',
         ]);
 
-        if ($post_id) {
-            update_post_meta($post_id, 'summary', 'A beginner-friendly guide to understanding and using the WordPress REST API.');
-            update_post_meta($post_id, 'level', 'beginner');
-        }
+        register_post_meta($this->post_type, '_level', [
+            'single' => true,
+            'show_in_rest' => true,
+            'type' => 'string',
+        ]);
+
     }
 
-    /**
-     * Helper to get valid levels
-     */
-    public function get_levels() {
-        return $this->levels;
+    public function add_meta_box() {
+        add_meta_box(
+            'resource_meta',
+            'Resource Details',
+            [$this, 'render_meta_box'],
+            $this->post_type,
+            'normal',
+            'default'
+        );
+    }
+
+    public function render_meta_box($post) {
+
+        $summary = get_post_meta($post->ID, '_summary', true);
+        $level = get_post_meta($post->ID, '_level', true);
+
+        ?>
+        <label><strong>Summary:</strong></label>
+        <textarea name="summary" rows="3" style="width:100%;"><?= esc_textarea($summary) ?></textarea>
+
+        <br><br>
+
+        <label><strong>Level:</strong></label>
+        <select name="level" style="width:100%;">
+            <option value="beginner"     <?= selected($level, 'beginner')?>>
+                Beginner
+            </option>
+            <option value="intermediate" <?= selected($level, 'intermediate')?>>
+                Intermediate
+            </option>
+            <option value="advanced"     <?= selected($level, 'advanced')?>>
+                Advanced
+            </option>
+        </select>
+        <?php
+    }
+
+    public function save_meta_box($post_id) {
+
+        if (isset($_POST['summary'])) 
+            update_post_meta($post_id, '_summary', sanitize_text_field($_POST['summary']));
+
+        if (isset($_POST['level'])) 
+            update_post_meta($post_id, '_level', sanitize_text_field($_POST['level']));
+
     }
 }
