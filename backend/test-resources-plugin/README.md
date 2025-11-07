@@ -28,6 +28,27 @@ GET /wp-json/test/v1/resources?min_level=intermediate
 
 ---
 
+### Reading time calculation
+
+The plugin returns a field called **`reading_estimate`**, which represents how many minutes it takes to read the summary.
+
+Formula used:
+
+`reading_estimate = ceil(total_words / 200)`
+
+
+Reasoning:
+
+- `200 words/minute` is a common reading speed benchmark.
+- If there is no summary, the estimate is `0`.
+
+Implementation (simplified):
+
+```php
+$words = str_word_count($summary);
+$minutes = ceil($words / 200);
+```
+
 ## Install
 
 1. Copy the plugin folder into:
