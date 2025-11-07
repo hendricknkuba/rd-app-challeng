@@ -13,7 +13,7 @@ class TR_Resource_CPT {
 
         add_filter('use_block_editor_for_post_type', function ($use, $post_type) {
             if ($post_type === $this->post_type) {
-                return false; // forçando Classic Editor
+                return false;
             }
             return $use;
         }, 10, 2);
@@ -29,7 +29,7 @@ class TR_Resource_CPT {
             'label' => 'Resources',
             'public' => true,
             'show_in_rest' => true,
-            'supports' => ['title', 'custom-fields'], // ✅ necessário para Gutenberg
+            'supports' => ['title', 'custom-fields'],
         ]);
 
         register_post_meta($this->post_type, '_summary', [
