@@ -14,9 +14,6 @@ It registers a `resource` post type and exposes the data through a custom REST e
 
 GET /wp-json/test/v1/resources
 
-makefile
-Copy code
-
 Filtering:
 
 GET /wp-json/test/v1/resources?min_level=intermediate
