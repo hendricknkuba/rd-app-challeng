@@ -1,15 +1,26 @@
-import "./style.css";
 import { getResources } from "./api";
 import { renderResources } from "./ui";
 
-async function load(level: string = "beginner") {
-  const resources = await getResources(level);
-  renderResources(resources);
+const filter = document.getElementById("filter") as HTMLSelectElement;
+const loadingElement = document.getElementById("loading")!;
+const app = document.getElementById("app")!;
+
+function sleep(ms: number) {
+  return new Promise(resolve => setTimeout(resolve, ms));
 }
 
-document.getElementById("filter")!.addEventListener("change", (e) => {
-  const value = (e.target as HTMLSelectElement).value;
-  load(value);
-});
+async function loadAndRenderResources() {
+  loadingElement.classList.remove("hidden");
+  app.innerHTML = "";
 
-load();
+  await sleep(500);
+
+  const data = await getResources(filter.value);
+
+  loadingElement.classList.add("hidden");
+  renderResources(data);
+}
+
+filter.addEventListener("change", loadAndRenderResources);
+
+loadAndRenderResources();
