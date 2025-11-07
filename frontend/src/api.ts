@@ -10,5 +10,6 @@ export async function getResources(minLevel: string = "beginner"): Promise<Resou
   const response = await fetch(
     `http://localhost/wordpress/wp-json/test/v1/resources?min_level=${minLevel}`
   );
+
   return await response.json();
 }
