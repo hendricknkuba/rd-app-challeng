@@ -1,101 +1,41 @@
-# Test Resources Plugin
+# WordPress Resources Plugin
 
-Custom WordPress plugin developed for the **Redding Designs - Junior Developer Technical Challenge**.
+Custom plugin for the **Redding Designs – Junior Developer Challenge**.
 
-This plugin exposes a **headless-style API** for a custom post type `resource`, allowing a TypeScript frontend to consume the data.
-
----
-
-## Features Implemented
-
-| Requiriments | Status |
-|----------|--------|
-| Custom Post Type `resource` | ✅ |
-| Meta fields: `summary` (text), `level` (enum) | ✅ |
-| Seed data automatically created on plugin activation | ✅ |
-| Custom REST endpoint `/wp-json/test/v1/resources` | ✅ |
-| Query param `?min_level=` with ordering logic | ✅ |
-| `reading_estimate` computed dynamically | ✅ |
-| Auth gating (summary only shown when authenticated) | ✅ |
-| Works with nonce + cookies (Thunder Client/Postman compatible) | ✅ |
+It registers a `resource` post type and exposes the data through a custom REST endpoint so it can be consumed by a TypeScript frontend.
 
 ---
 
-## REST API Endpoint
+## What it does
 
-GET  `/wp-json/test/v1/resources`
+- Registers a custom post type: **resource**
+- Adds fields: `summary` and `level` (beginner / intermediate / advanced)
+- Exposes a REST endpoint:
 
-### Query Params
+GET /wp-json/test/v1/resources
 
-| Param | Values | Default | Behavior |
-|-------|--------|----------|----------|
-| `min_level` | beginner / intermediate / advanced | beginner | Returns resources with level >= `min_level` |
+makefile
+Copy code
 
-Example:
+Filtering:
 
-GET `/wp-json/test/v1/resources?min_level=intermediate`
-
-
----
-
-## Reading Estimate (required by challenge)
-
-Formula used:
-
-```txt
-reading_estimate = ceil(total_words / 200)
-200 words/minute It's a real-world benchmark used by the industry to estimate reading time.
-
-Implementation in the code:
-
-$words = str_word_count($summary);
-$minutes = ceil($words / 200);
-```
+GET /wp-json/test/v1/resources?min_level=intermediate
 
 
-### Authentication Behavior
 
-| Request status | Summary returns |
-|-------|--------|
-| Unauthenticated user | `null`|
-| Authenticated user | actual text of the summary |
-
-### How to test authenticated
-
-#### 1. Logged in 
-
-Open in an incognito window:
-
-`http://localhost/wordpress/wp-json/test/v1/resources`
-
-#### 2. Not authenticated (Postman)
-
-GET `http://localhost/wordpress/wp-json/test/v1/resources`
-
-Required:
-
-- `X-WP-Nonce` header
-
-- `wordpress_logged_in_<hash>` cookie
-
-
-Once those are included, the summary will be visible.
+- Returns reading time (`reading_estimate`)
+- If the user is not logged in, `summary` is hidden (`null`)
 
 ---
 
-## Installation
+## Install
 
-Copy the folder:
+1. Copy the plugin folder into:
 
-`backend/test-resources-plugin/`
+wp-content/plugins/
 
+2. Activate it in:
 
-into:
+`WordPress Admin → Plugins → Test Resources Plugin → Activate`
 
-`wp-content/plugins/`
-
-In WordPress admin:
-
-`Plugins → Test Resources Plugin → Activate`
-
-A sample resource will be created automatically.
+A sample resource is automatically created on activation.
